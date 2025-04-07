@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo.png' %}">
+    <title>
+      {% block title %}
+        Homepage
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    {% block head %}
+    {% endblock %}
+  </head>
+  <body>
+    <div class="navbar">
+      <img src="{% static 'img/askhub.png' %}" alt="" />
+      <ul>
+        <li>
+          <a href="">Home</a>
+        </li>
+        <li>
+          <a href="">My Questions</a>
+        </li>
+        <li>
+          <a href="">My Answers</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li>
+            <a href="{% url 'logout_user' %}">Logout</a>
+          </li>
+        {% else %}
+          <li>
+            <a href="{% url 'login_user' %}">Login</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+    {% if messages %}
+      {% for message in messages %}
+        <div id="alert" class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}
+    {% endblock %}
+    <script>
+        setTimeout(() => {
+            document.getElementById('alert').style.display = 'none';
+        }, 15000);
+    </script>
+  </body>
+</html>
