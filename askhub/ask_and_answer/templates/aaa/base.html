@@ -26,9 +26,6 @@
         <li>
           <a href="{% url "user_questions" %}">My Questions</a>
         </li>
-        {% comment %} <li>
-          <a href="">My Answers</a>
-        </li> {% endcomment %}
         {% if user.is_authenticated %}
           <li>
             <a style="color: red;" href="{% url 'logout_user' %}">Logout</a>
