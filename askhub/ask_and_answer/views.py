@@ -1,13 +1,40 @@
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,redirect
+from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login,logout
 from django.contrib.auth.hashers import make_password
-from .models import User
+from .models import User,Question,Answer,Like
+from django.core.paginator import Paginator
 
-from .forms import user_form
+
+from .forms import user_form,question_form
 # Create your views here.
 def home_page(req):
-    return render(req,'aaa/home.html')
+    form=question_form(initial={'author':req.user.username})
+    questions=Question.objects.all().values().order_by('-id')
+    for que in questions:
+        answer_ls=[]
+        answers=Answer.objects.filter(question=que['id']).values()
+        for ans in answers: 
+            ans['like']=Like.objects.filter(answer=ans['id'],user=req.user).exists()
+            answer_ls.append(ans)
+            answer_ls.sort(key=lambda x: x['likes'], reverse=True)
+        que['answers']=answer_ls
+    if req.method=='POST':
+        if not req.user.is_authenticated:
+            messages.error(req,'Please login into your account.')
+            return redirect('login_user')
+        
+        form=question_form(req.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(req,'Question is added successfully.')
+            return redirect('home')
+    context={
+        'form':form,
+        'questions':questions
+    }
+    return render(req,'aaa/home.html',context)
 
 def login_user(req):
     if req.method=="POST":
@@ -43,3 +70,49 @@ def logout_user(req):
     logout(req)
     messages.success(req,'Successfully logout. Please log in.')
     return redirect('login_user')
+
+def post_answer(req,id):
+    question=Question.objects.get(id=id)
+    answers=Answer.objects.filter(question=question).values()
+    if req.method=="POST":
+        ans=req.POST['answer']
+        Answer.objects.create(question=question,author=req.user.username,answer=ans)
+        messages.success(req,'You answer posted successfully.')
+        return redirect('home')
+    context={
+        'question':question,
+
+    }
+    return render(req,'aaa/post_answer.html',context)
+
+def user_questions(req):
+    questions=Question.objects.filter(author=req.user.username).values().order_by('-id')
+    for que in questions:
+        answer_ls=[]
+        answers=Answer.objects.filter(question=que['id']).values()
+        for ans in answers: 
+            ans['like']=Like.objects.filter(answer=ans['id'],user=req.user).exists()
+            answer_ls.append(ans)
+            answer_ls.sort(key=lambda x: x['likes'], reverse=True)
+        que['answers']=answer_ls
+    return render(req,'aaa/user_questions.html',{'questions':questions})
+
+def delete_question(req,id):
+    question=Question.objects.get(id=id)
+    question.delete()
+    messages.warning(req,'Question is deleted successfully.')
+    return redirect('user_questions')
+# Ajax requests
+
+def like_unlike(req,id):
+    answer=Answer.objects.get(id=id)
+    try:
+        like=Like.objects.get(answer=answer,user=req.user)
+        answer.likes-=1
+        like.delete()
+    except Like.DoesNotExist:
+        Like.objects.create(answer=answer,user=req.user)
+        answer.likes+=1
+    finally:
+        answer.save()
+    return JsonResponse({'updated':True})

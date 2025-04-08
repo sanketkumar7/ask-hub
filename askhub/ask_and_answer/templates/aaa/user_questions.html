@@ -1,38 +1,20 @@
 {% extends 'aaa/base.html' %}
 {% load static %}
 {% block title %}
-  Home
+  My Questions
 {% endblock %}
 {% block head %}
 
 {% endblock %}
 {% block content %}
-  <form action="" method="post">
-    {% csrf_token %}
-    <div class="question">
-      <div class="box">
-        {{ form.author }}
-        <div class="inp">{{ form.question }}
-          {{ form.question.errors }}</div>
-        <div class="inp">
-          <div>{{ form.category.label_tag }}
-            {{ form.category }}
-            {{ form.category.errors }}</div>
-        </div>
-        <div class="sub-btn">
-          <input type="submit" value="Post" />
-        </div>
-      </div>
-    </div>
-  </form>
   <div class="questions">
     <div class="box">
-      <h2>All Questions</h2>
+      <h2>My Questions</h2>
       {% for que in questions %}
         <div class="que-box">
           <div class="que">
             <h3>Q. {{ que.question }}</h3>
-            <p>--by {{ que.author }}</p>
+            <h1 ><a onclick="return confirm('Are you sure want to delete?')" style="color: red;text-decoration: none;" href="{% url 'delete_question' que.id %}">&times;</a></h1>
           </div>
           <h4>Category : {{ que.category }}</h4>
 

@@ -1,0 +1,22 @@
+{% extends 'aaa/base.html' %}
+{% load static %}
+{% block title %}
+  Post Answer
+{% endblock %}
+{% block head %}
+
+{% endblock %}
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="question">
+      <div class="box">
+        <h3>Q. {{ question }}</h3>
+        <textarea name="answer" rows="3" cols="50" placeholder="Type your answer here..."></textarea>
+        <div class="sub-btn">
+          <input type="submit" value="Post Answer" />
+        </div>
+      </div>
+    </div>
+  </form>
+{% endblock %}
