@@ -4,11 +4,13 @@ from django.contrib import messages
 from django.contrib.auth import login,logout
 from django.contrib.auth.hashers import make_password
 from .models import User,Question,Answer,Like
+from django.contrib.auth.decorators import login_required
+
+from .decorators import unauthenticated
 from django.template.loader import render_to_string
-
-
 from .forms import user_form,question_form
 # Create your views here.
+
 def home_page(req):
     form=question_form(initial={'author':req.user.username})
     questions=Question.objects.all().values().order_by('-id')
@@ -36,6 +38,7 @@ def home_page(req):
     }
     return render(req,'aaa/home.html',context)
 
+@unauthenticated
 def login_user(req):
     if req.method=="POST":
         username=req.POST['username']
@@ -51,6 +54,8 @@ def login_user(req):
         else:
             messages.error(req,'Invalid Username or Password.')
     return render(req,'aaa/login.html')
+
+@unauthenticated
 def register_user(req):
     form= user_form()
     if req.method=="POST":
@@ -71,6 +76,7 @@ def logout_user(req):
     messages.success(req,'Successfully logout. Please log in.')
     return redirect('login_user')
 
+@login_required(login_url='login_user')
 def post_answer(req,id):
     question=Question.objects.get(id=id)
     answers=Answer.objects.filter(question=question).values()
@@ -85,6 +91,7 @@ def post_answer(req,id):
     }
     return render(req,'aaa/post_answer.html',context)
 
+@login_required(login_url='login_user')
 def user_questions(req):
     questions=Question.objects.filter(author=req.user.username).values().order_by('-id')
     for que in questions:
@@ -97,6 +104,7 @@ def user_questions(req):
         que['answers']=answer_ls
     return render(req,'aaa/user_questions.html',{'questions':questions})
 
+@login_required(login_url='login_user')
 def delete_question(req,id):
     question=Question.objects.get(id=id)
     question.delete()
@@ -104,6 +112,7 @@ def delete_question(req,id):
     return redirect('user_questions')
 # Ajax requests
 
+@login_required(login_url='login_user')
 def like_unlike(req,id):
     answer=Answer.objects.get(id=id)
     try:
