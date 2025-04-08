@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login,logout
 from django.contrib.auth.hashers import make_password
 from .models import User,Question,Answer,Like
-from django.core.paginator import Paginator
+from django.template.loader import render_to_string
 
 
 from .forms import user_form,question_form
@@ -115,4 +115,14 @@ def like_unlike(req,id):
         answer.likes+=1
     finally:
         answer.save()
-    return JsonResponse({'updated':True})
+    questions=Question.objects.all().values().order_by('-id')
+    for que in questions:
+        answer_ls=[]
+        answers=Answer.objects.filter(question=que['id']).values()
+        for ans in answers: 
+            ans['like']=Like.objects.filter(answer=ans['id'],user=req.user).exists()
+            answer_ls.append(ans)
+            answer_ls.sort(key=lambda x: x['likes'], reverse=True)
+        que['answers']=answer_ls
+        dbody_html = render_to_string('aaa/ajax/dbody.html', {'questions': questions})
+    return JsonResponse({'updated':True,'dbody_html':dbody_html})

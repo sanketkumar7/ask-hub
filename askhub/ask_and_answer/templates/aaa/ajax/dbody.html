@@ -1,33 +1,5 @@
-{% extends 'aaa/base.html' %}
 {% load static %}
-{% block title %}
-  Home
-{% endblock %}
-{% block head %}
-
-{% endblock %}
-{% block content %}
-  <form action="" method="post">
-    {% csrf_token %}
-    <div class="question">
-      <div class="box">
-        {{ form.author }}
-        <div class="inp">{{ form.question }}
-          {{ form.question.errors }}</div>
-        <div class="inp">
-          <div>{{ form.category.label_tag }}
-            {{ form.category }}
-            {{ form.category.errors }}</div>
-        </div>
-        <div class="sub-btn">
-          <input type="submit" value="Post" />
-        </div>
-      </div>
-    </div>
-  </form>
-  <div class="questions">
-    <div id="questions-box" class="box">
-      <h2>All Questions</h2>
+<h2>All Questions</h2>
       {% for que in questions %}
         <div class="que-box">
           <div class="que">
@@ -59,15 +31,3 @@
           </div>
         </div>
       {% endfor %}
-    </div>
-  </div>
-  <script>
-    function like_unlike(answer) {
-      $.get(`/like-unlike/${answer}`, function (response) {
-        if (response.updated) {
-          $('#questions-box').html(response.dbody_html);
-        }
-      })
-    }
-  </script>
-{% endblock %}
