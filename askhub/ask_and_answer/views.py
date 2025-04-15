@@ -18,7 +18,7 @@ def home_page(req):
         answer_ls=[]
         answers=Answer.objects.filter(question=que['id']).values()
         for ans in answers: 
-            ans['like']=Like.objects.filter(answer=ans['id'],user=req.user).exists()
+            ans['like']=req.user.is_authenticated and Like.objects.filter(answer=ans['id'],user=req.user).exists()
             answer_ls.append(ans)
             answer_ls.sort(key=lambda x: x['likes'], reverse=True)
         que['answers']=answer_ls
